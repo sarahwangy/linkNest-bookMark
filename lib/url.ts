@@ -10,11 +10,16 @@ export function normalizeUrl(input: string): string {
     u.hostname = u.hostname.toLowerCase();
 
     const params = new URLSearchParams();
+    const entries: [string, string][] = [];
     u.searchParams.forEach((value, key) => {
       if (!TRACKING_PARAMS.has(key.toLowerCase())) {
-        params.append(key, value);
+        entries.push([key, value]);
       }
     });
+    entries.sort(([a], [b]) => a.localeCompare(b));
+    for (const [key, value] of entries) {
+      params.append(key, value);
+    }
     u.search = params.toString();
     u.hash = "";
 

@@ -30,10 +30,15 @@ describe("normalizeUrl", () => {
 
   it("keeps non-tracking query params", () => {
     expect(normalizeUrl("https://example.com/search?q=react&page=2"))
-      .toBe("https://example.com/search?q=react&page=2");
+      .toBe("https://example.com/search?page=2&q=react");
   });
 
   it("returns original on invalid URL", () => {
     expect(normalizeUrl("not-a-url")).toBe("not-a-url");
+  });
+
+  it("sorts query params for deterministic output", () => {
+    expect(normalizeUrl("https://example.com/?b=2&a=1"))
+      .toBe(normalizeUrl("https://example.com/?a=1&b=2"));
   });
 });
