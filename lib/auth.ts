@@ -2,7 +2,6 @@ import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { db } from "@/lib/db";
-import { createHash } from "crypto";
 import type { Adapter, AdapterUser } from "next-auth/adapters";
 
 // PrismaAdapter v2 hardcodes `p.account` but our schema uses `authAccount`.
@@ -60,19 +59,3 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
 });
 
-export async function requireToken(
-  authHeader: string | null
-): Promise<string | null> {
-  if (!authHeader?.startsWith("Bearer ")) return null;
-  const raw = authHeader.slice(7);
-  const hash = createHash("sha256").update(raw).digest("hex");
-  const token = await db.apiToken.findFirst({
-    where: { tokenHash: hash, revokedAt: null },
-  });
-  if (!token) return null;
-  await db.apiToken.update({
-    where: { id: token.id },
-    data: { lastUsedAt: new Date() },
-  });
-  return token.userId;
-}

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireToken } from "@/lib/auth";
+import { requireToken } from "@/lib/auth-server";
 
 export async function GET(req: NextRequest) {
   const userId = await requireToken(req.headers.get("authorization"));

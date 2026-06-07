@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireToken } from "@/lib/auth";
+import { requireToken } from "@/lib/auth-server";
 import { db } from "@/lib/db";
 import { normalizeUrl } from "@/lib/url";
 import { inngest } from "@/lib/inngest";
