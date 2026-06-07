@@ -3,6 +3,7 @@ import { requireToken } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { normalizeUrl } from "@/lib/url";
 import { inngest } from "@/lib/inngest";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 interface BookmarkInput {
   url: string;
@@ -24,6 +25,11 @@ export async function POST(req: NextRequest) {
   const userId = await requireToken(req.headers.get("authorization"));
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { allowed } = checkRateLimit(userId);
+  if (!allowed) {
+    return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
   }
 
   let body: SyncBody;
