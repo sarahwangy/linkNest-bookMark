@@ -72,7 +72,7 @@ async function main() {
   }
 
   const withAI = await db.bookmark.findMany({
-    where: { aiCategory: { not: null }, deletedAt: null, embedding: null },
+    where: { aiCategory: { not: null }, deletedAt: null, embedding: { is: null } },
     select: { id: true, title: true, ogDescription: true, aiTags: true },
     take: 500,
   });

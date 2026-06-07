@@ -101,7 +101,7 @@ async function semanticSearch(userId: string, q: string, limit: number) {
     WHERE b."userId" = ${userId}
       AND b."deletedAt" IS NULL
     ORDER BY be.embedding <=> ${vector}::vector
-    LIMIT ${Prisma.raw(String(limit))}
+    LIMIT ${limit}
   `;
 
   const results = rows.map((r) => ({
