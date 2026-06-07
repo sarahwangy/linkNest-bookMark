@@ -1,12 +1,12 @@
-import { Inngest } from "inngest";
 import { db } from "@/lib/db";
 import { fetchOgData } from "@/lib/og";
 import { checkUrl } from "@/lib/dead-check";
 import { getFaviconUrl } from "@/lib/favicon";
 import { classifyBookmark } from "@/lib/claude";
 import { generateEmbedding } from "@/lib/openai";
+import { inngest } from "@/lib/inngest-client";
 
-export const inngest = new Inngest({ id: "linknest" });
+export { inngest };
 
 export const helloWorld = inngest.createFunction(
   { id: "hello-world", triggers: [{ event: "test/hello" }] },
