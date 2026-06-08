@@ -4,10 +4,11 @@ import GoogleProvider from "next-auth/providers/google";
 // Edge-compatible auth config — no Prisma adapter, no Node.js-only imports.
 // Used by proxy.ts (Edge Runtime). Full auth with adapter lives in lib/auth.ts.
 export const authConfig: NextAuthConfig = {
+  session: { strategy: "jwt" },
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      clientId: (process.env.GOOGLE_CLIENT_ID ?? process.env.AUTH_GOOGLE_ID)!,
+      clientSecret: (process.env.GOOGLE_CLIENT_SECRET ?? process.env.AUTH_GOOGLE_SECRET)!,
     }),
   ],
   pages: {

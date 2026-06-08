@@ -42,6 +42,7 @@ function createAdapter(): Adapter {
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: createAdapter(),
+  session: { strategy: "jwt" },
   providers: [
     GoogleProvider({
       clientId: (process.env.GOOGLE_CLIENT_ID ?? process.env.AUTH_GOOGLE_ID)!,
@@ -49,18 +50,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    session({ session, user }) {
-      session.user.id = user.id;
+    jwt({ token, user }) {
+      if (user) token.id = user.id;
+      return token;
+    },
+    session({ session, token }) {
+      if (token.id) session.user.id = token.id as string;
       return session;
     },
   },
   pages: {
     signIn: "/login",
-  },
-  logger: {
-    error(error) {
-      console.error("[auth][error]", error.name, (error as Error).message, (error as Error).cause);
-    },
   },
 });
 
