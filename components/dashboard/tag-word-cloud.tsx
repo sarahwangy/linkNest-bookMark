@@ -18,6 +18,7 @@ const options = {
 };
 
 export function TagWordCloud({ words }: TagWordCloudProps) {
+  const safeWords = words?.length ? words : [{ text: "no tags yet", value: 1 }];
   return (
     <Card>
       <CardHeader>
@@ -25,7 +26,7 @@ export function TagWordCloud({ words }: TagWordCloudProps) {
       </CardHeader>
       <CardContent>
         <div style={{ height: 200 }}>
-          <WordCloud words={words} options={options} />
+          <WordCloud words={safeWords} options={options} />
         </div>
       </CardContent>
     </Card>
