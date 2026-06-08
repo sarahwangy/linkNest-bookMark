@@ -3,6 +3,16 @@ import { requireToken } from "@/lib/auth-server";
 import { db } from "@/lib/db";
 import { normalizeUrl } from "@/lib/url";
 import { inngest } from "@/lib/inngest-client";
+
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Authorization, Content-Type",
+};
+
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: CORS_HEADERS });
+}
 import { checkRateLimit } from "@/lib/rate-limit";
 
 interface BookmarkInput {
@@ -24,31 +34,31 @@ interface SyncBody {
 export async function POST(req: NextRequest) {
   const userId = await requireToken(req.headers.get("authorization"));
   if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401, headers: CORS_HEADERS });
   }
 
   const { allowed } = checkRateLimit(userId);
   if (!allowed) {
-    return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
+    return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429, headers: CORS_HEADERS });
   }
 
   let body: SyncBody;
   try {
     body = await req.json();
   } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400, headers: CORS_HEADERS });
   }
 
   const { account: accountLabel, browser = "chrome", bookmarks, deletedIds = [], mode } = body;
 
   if (!accountLabel) {
-    return NextResponse.json({ error: "account is required" }, { status: 400 });
+    return NextResponse.json({ error: "account is required" }, { status: 400, headers: CORS_HEADERS });
   }
   if (!Array.isArray(bookmarks)) {
-    return NextResponse.json({ error: "bookmarks must be an array" }, { status: 400 });
+    return NextResponse.json({ error: "bookmarks must be an array" }, { status: 400, headers: CORS_HEADERS });
   }
   if (bookmarks.length > 500) {
-    return NextResponse.json({ error: "Max 500 bookmarks per request" }, { status: 413 });
+    return NextResponse.json({ error: "Max 500 bookmarks per request" }, { status: 413, headers: CORS_HEADERS });
   }
 
   // Upsert account
@@ -105,10 +115,14 @@ export async function POST(req: NextRequest) {
       });
       added++;
 
-      await inngest.send({
-        name: "bookmark.created",
-        data: { bookmarkId: created.id, url: bm.url },
-      });
+      try {
+        await inngest.send({
+          name: "bookmark.created",
+          data: { bookmarkId: created.id, url: bm.url },
+        });
+      } catch {
+        // Inngest not configured — AI enrichment skipped, sync still succeeds
+      }
     }
   }
 
@@ -147,5 +161,5 @@ export async function POST(req: NextRequest) {
     },
   });
 
-  return NextResponse.json({ added, updated, deleted });
+  return NextResponse.json({ added, updated, deleted }, { headers: CORS_HEADERS });
 }
