@@ -44,8 +44,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: createAdapter(),
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      clientId: (process.env.GOOGLE_CLIENT_ID ?? process.env.AUTH_GOOGLE_ID)!,
+      clientSecret: (process.env.GOOGLE_CLIENT_SECRET ?? process.env.AUTH_GOOGLE_SECRET)!,
     }),
   ],
   callbacks: {
@@ -56,6 +56,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   pages: {
     signIn: "/login",
+  },
+  logger: {
+    error(error) {
+      console.error("[auth][error]", error.name, (error as Error).message, (error as Error).cause);
+    },
   },
 });
 
