@@ -1,33 +1,40 @@
 "use client";
-import dynamic from "next/dynamic";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-const WordCloud = dynamic(() => import("react-wordcloud"), { ssr: false });
 
 interface TagWordCloudProps {
   words: { text: string; value: number }[];
 }
 
-const options = {
-  colors: ["#7c3aed", "#2563eb", "#16a34a", "#ea580c", "#db2777"],
-  enableTooltip: false,
-  fontFamily: "Inter, sans-serif",
-  fontSizes: [12, 40] as [number, number],
-  rotations: 0,
-  rotationAngles: [0, 0] as [number, number],
-};
+const COLORS = ["#7c3aed", "#2563eb", "#16a34a", "#ea580c", "#db2777", "#0891b2", "#d97706"];
 
 export function TagWordCloud({ words }: TagWordCloudProps) {
-  const safeWords = words?.length ? words : [{ text: "no tags yet", value: 1 }];
+  const safe = words?.length ? words : [];
+  const max = Math.max(...safe.map((w) => w.value), 1);
+
   return (
     <Card>
       <CardHeader>
         <CardTitle className="text-sm font-medium">Top Tags</CardTitle>
       </CardHeader>
       <CardContent>
-        <div style={{ height: 200 }}>
-          <WordCloud words={safeWords} options={options} />
-        </div>
+        {safe.length === 0 ? (
+          <p className="text-xs text-muted-foreground">No tags yet</p>
+        ) : (
+          <div className="flex flex-wrap gap-2 items-center" style={{ minHeight: 120 }}>
+            {safe.map((w, i) => {
+              const size = 11 + Math.round((w.value / max) * 20);
+              return (
+                <span
+                  key={w.text}
+                  style={{ fontSize: size, color: COLORS[i % COLORS.length], lineHeight: 1.3 }}
+                  className="font-medium select-none"
+                >
+                  {w.text}
+                </span>
+              );
+            })}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
